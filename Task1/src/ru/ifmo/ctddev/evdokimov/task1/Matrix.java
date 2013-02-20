@@ -4,7 +4,7 @@ public class Matrix {
 	private int[][] data = null;
 	private int w, h;
 
-	public Matrix(int[][] data) {
+	public Matrix(int[][] data) throws MatrixWrongOperandException {
 		w = data.length;
 
 		if (w > 0) {
@@ -15,9 +15,8 @@ public class Matrix {
 
 		for (int i = 0; i < w; ++i) {
 			if (h != data[i].length) {
-				throw new IllegalArgumentException("Matrix non rectangle");
+				throw new MatrixWrongOperandException("Matrix is not rectangle");
 			}
-			// TODO change
 		}
 
 		this.data = new int[w][h];
@@ -28,9 +27,20 @@ public class Matrix {
 		}
 	}
 
-	public Matrix add(Matrix a) {
+	public Matrix(int a, int b) {
+		w = a;
+		h = b;
+		data = new int[a][b];
+		for (int i = 0; i < w; ++i) {
+			for (int j = 0; j < h; ++j) {
+				data[i][j] = 0;
+			}
+		}
+	}
+
+	public Matrix add(Matrix a) throws MatrixWrongOperandException {
 		if (h != a.h || w != a.w) {
-			throw new IllegalArgumentException("Wrong op in add");
+			throw new MatrixWrongOperandException("Wrong operand in add");
 		}
 
 		Matrix res = new Matrix(data);
@@ -43,9 +53,9 @@ public class Matrix {
 		return res;
 	}
 
-	public Matrix sub(Matrix a) {
+	public Matrix sub(Matrix a) throws MatrixWrongOperandException {
 		if (h != a.h || w != a.w) {
-			throw new IllegalArgumentException("Wrong op in sub");
+			throw new MatrixWrongOperandException("Wrong operand in sub");
 		}
 
 		Matrix res = new Matrix(data);
@@ -59,7 +69,7 @@ public class Matrix {
 	}
 
 	// TODO change mul
-	public Matrix mul(Matrix a) {
+	public Matrix mul(Matrix a) throws MatrixWrongOperandException {
 		if (h != a.h || w != a.w) {
 			throw new IllegalArgumentException("Wrong op in mul");
 		}
@@ -74,21 +84,21 @@ public class Matrix {
 		return res;
 	}
 
-	public int get(int i, int j) {
+	public int get(int i, int j) throws MatrixIndexOfBoundException {
 		if (!(i < w && j < h)) {
-			throw new IllegalArgumentException("Wrong op in get");
+			throw new MatrixIndexOfBoundException("Wrong indexes in get");
 		}
 		return data[i][j];
 	}
 
-	public void set(int i, int j, int value) {
+	public void set(int i, int j, int value) throws MatrixWrongOperandException {
 		if (!(i < w && j < h)) {
-			throw new IllegalArgumentException("Wrong op in set");
+			throw new MatrixWrongOperandException("Wrong indexes in set");
 		}
 		data[i][j] = value;
 	}
 
-	public Matrix scale(int m) {
+	public Matrix scale(int m) throws MatrixWrongOperandException {
 		Matrix res = new Matrix(data);
 		for (int i = 0; i < w; ++i) {
 			for (int j = 0; j < h; ++j) {
@@ -109,7 +119,7 @@ public class Matrix {
 		return res;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws MatrixWrongOperandException {
 		int[][] a = { { 1, 2 }, { 3, 4 } };
 
 		int[][] b = { { 5, 6 }, { 7, 8 } };
