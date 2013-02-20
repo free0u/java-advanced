@@ -68,19 +68,23 @@ public class Matrix {
 		return res;
 	}
 
-	// TODO change mul
 	public Matrix mul(Matrix a) throws MatrixWrongOperandException {
-		if (h != a.h || w != a.w) {
-			throw new IllegalArgumentException("Wrong op in mul");
+		if (h != a.w) {
+			throw new MatrixWrongOperandException("Wrong operand in mul");
 		}
 
-		Matrix res = new Matrix(data);
+		Matrix res = new Matrix(w, a.h);
+		
 		for (int i = 0; i < w; ++i) {
-			for (int j = 0; j < h; ++j) {
-				res.data[i][j] -= a.data[i][j];
+			for (int j = 0; j < a.h; ++j) {
+				int acc = 0;
+				for (int g = 0; g < h; ++g) {
+					acc += data[i][g] * a.data[g][j];
+				}
+				res.data[i][j] = acc;
 			}
 		}
-
+		
 		return res;
 	}
 
@@ -120,14 +124,18 @@ public class Matrix {
 	}
 
 	public static void main(String[] args) throws MatrixWrongOperandException {
-		int[][] a = { { 1, 2 }, { 3, 4 } };
+		int[][] a = { 
+				{2, 1}
+		};
 
-		int[][] b = { { 5, 6 }, { 7, 8 } };
+		int[][] b = { 
+				{1}, {2}
+		};
 
 		Matrix A = new Matrix(a);
 		Matrix B = new Matrix(b);
 
-		Matrix C = A.sub(B).add(B).sub(B).add(B);
+		Matrix C = A.mul(B);
 		System.out.println(C);
 	}
 
