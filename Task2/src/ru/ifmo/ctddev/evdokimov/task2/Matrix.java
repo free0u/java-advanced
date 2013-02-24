@@ -9,7 +9,7 @@ public class Matrix {
 
 		if (w > 0) {
 			if (data[0] == null) {
-				throw new MatrixWrongOperandException("Matrix contain null row");
+				throw new MatrixWrongOperandException(String.format("Matrix contain null row: %d", 0));
 			}
 			h = data[0].length;
 		} else {
@@ -18,7 +18,7 @@ public class Matrix {
 
 		for (int i = 0; i < w; ++i) {
 			if (data[i] == null) {
-				throw new MatrixWrongOperandException("Matrix contain null row");
+				throw new MatrixWrongOperandException(String.format("Matrix contain null row: %d", i));
 			}
 			if (h != data[i].length) {
 				throw new MatrixWrongOperandException("Matrix is not rectangle");
@@ -37,11 +37,6 @@ public class Matrix {
 		w = a;
 		h = b;
 		data = new int[a][b];
-//		for (int i = 0; i < w; ++i) {
-//			for (int j = 0; j < h; ++j) {
-//				data[i][j] = 0;
-//			}
-//		}
 	}
 	
 	public Matrix transpose() {
@@ -56,7 +51,7 @@ public class Matrix {
 
 	public Matrix add(Matrix a) {
 		if (h != a.h || w != a.w) {
-			throw new MatrixWrongOperandException("Wrong operand in add");
+			throw new MatrixWrongOperandException(String.format("Different sizes of matrix: %dx%x and %dx%d", w, h, a.w, a.h));
 		}
 
 		Matrix res = new Matrix(data);
@@ -71,7 +66,7 @@ public class Matrix {
 
 	public Matrix sub(Matrix a) {
 		if (h != a.h || w != a.w) {
-			throw new MatrixWrongOperandException("Wrong operand in sub");
+			throw new MatrixWrongOperandException(String.format("Different sizes of matrix: %dx%x and %dx%d", w, h, a.w, a.h));
 		}
 
 		Matrix res = new Matrix(data);
@@ -86,7 +81,7 @@ public class Matrix {
 
 	public Matrix mul(Matrix a) {
 		if (h != a.w) {
-			throw new MatrixWrongOperandException("Wrong operand in mul");
+			throw new MatrixWrongOperandException(String.format("Different sizes of matrix: %dx%x and %dx%d", w, h, a.w, a.h));
 		}
 
 		Matrix res = new Matrix(w, a.h);
@@ -106,14 +101,14 @@ public class Matrix {
 
 	public int get(int i, int j) {
 		if (!(i < w && j < h && i >= 0 && j >= 0)) {
-			throw new MatrixIndexOfBoundException("Wrong indexes in get");
+			throw new MatrixIndexOfBoundException(i, j);
 		}
 		return data[i][j];
 	}
 
 	public void set(int i, int j, int value) {
 		if (!(i < w && j < h && i >= 0 && j >= 0)) {
-			throw new MatrixIndexOfBoundException("Wrong indexes in set");
+			throw new MatrixIndexOfBoundException(i, j);
 		}
 		data[i][j] = value;
 	}

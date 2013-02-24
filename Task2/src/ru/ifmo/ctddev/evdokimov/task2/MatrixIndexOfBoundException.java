@@ -5,6 +5,12 @@ public class MatrixIndexOfBoundException extends RuntimeException {
 		super(message);
 	}
 	
+	public MatrixIndexOfBoundException(int i, int j) {
+		super(String.format("Wrong indexes: %d, %d", i, j));
+	}
+	
+	
+	
 	public MatrixIndexOfBoundException(String message, Throwable cause) {
 		super(message, cause);
 	}
