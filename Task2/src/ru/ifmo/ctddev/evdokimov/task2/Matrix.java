@@ -64,7 +64,7 @@ public class Matrix {
 		return res;
 	}
 
-	public Matrix sub(Matrix a) {
+	public Matrix substract(Matrix a) {
 		if (h != a.h || w != a.w) {
 			throw new MatrixWrongOperandException(String.format("Different sizes of matrix: %dx%x and %dx%d", w, h, a.w, a.h));
 		}
@@ -79,7 +79,7 @@ public class Matrix {
 		return res;
 	}
 
-	public Matrix mul(Matrix a) {
+	public Matrix multiply(Matrix a) {
 		if (h != a.w) {
 			throw new MatrixWrongOperandException(String.format("Different sizes of matrix: %dx%x and %dx%d", w, h, a.w, a.h));
 		}
@@ -132,22 +132,5 @@ public class Matrix {
 			res += "\n";
 		}
 		return res;
-	}
-
-	public static void main(String[] args) {
-		int[][] a = { 
-				{1, 2},
-				{3, 4}
-		};
-
-		int[][] b = { 
-				{5, 6},
-				{7, 8}
-		};
-
-		Matrix A = new Matrix(a);
-		Matrix B = new Matrix(b);
-		Matrix C = A.mul(A.transpose()).add(B);
-		System.out.println(C);
 	}
 }
