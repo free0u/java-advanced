@@ -1,5 +1,9 @@
 package ru.ifmo.ctddev.evdokimov.task2;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class Matrix {
 	private int[][] data;
 	private int w, h;
@@ -33,6 +37,19 @@ public class Matrix {
 		}
 	}
 
+	public Matrix (File file) throws FileNotFoundException {
+		Scanner sc = new Scanner(file);
+		w = sc.nextInt();
+		h = sc.nextInt();
+		data = new int[w][h];
+		
+		for (int i = 0; i < w; ++i) {
+			for (int j = 0; j < h; ++j) {
+				data[i][j] = sc.nextInt();
+			}
+		}
+	}
+	
 	public Matrix(int a, int b) {
 		w = a;
 		h = b;
