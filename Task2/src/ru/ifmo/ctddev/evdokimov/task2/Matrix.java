@@ -1,8 +1,11 @@
 package ru.ifmo.ctddev.evdokimov.task2;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -104,19 +107,19 @@ public class Matrix {
 	}
 	
 	void write(File file) throws MatrixIOException {
-		FileWriter writer = null;
+		DataOutputStream writer = null;
 		try {
-			writer = new FileWriter(file);
+			writer = new DataOutputStream(new FileOutputStream(file));
 
 			try {
-				writer.write(w + " " + h + "\n");
+				writer.writeChars(w + " " + h + "\n");
 				for (int i = 0; i < w; ++i) {
 					for (int j = 0; j < h; ++j) {
-						writer.write(String.valueOf(data[i][j]));
-						writer.write(" ");
+						writer.writeInt(data[i][j]);
+						writer.writeChars(" ");
 						
 					}
-					writer.write("\n");
+					writer.writeChars("\n");
 				}
 			} catch (IOException e) {
 				throw new MatrixIOException("Error writing in file", e);
