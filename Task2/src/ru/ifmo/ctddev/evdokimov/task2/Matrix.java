@@ -1,14 +1,10 @@
 package ru.ifmo.ctddev.evdokimov.task2;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class Matrix {
@@ -44,45 +40,14 @@ public class Matrix {
 		}
 	}
 
+	
 	public Matrix(File file) throws MatrixIOException {
 		FileReader reader = null;
 		try {
 			reader = new FileReader(file);
 			Scanner sc = new Scanner(reader);
 			
-			if (sc.hasNextInt()) {
-				w = sc.nextInt();
-				if (w < 0) {
-					throw new MatrixWrongDataException("Width should be non-negative");
-				}
-			} else
-			{
-				throw new MatrixWrongDataException("Not found width in file");
-				
-			}
-			
-			if (sc.hasNextInt()) {
-				h = sc.nextInt();
-				if (h < 0) {
-					throw new MatrixWrongDataException("Heigth should be non-negative");
-				}
-			} else
-			{
-				throw new MatrixWrongDataException("Not found height in file");
-			}
-			
-			data = new int[w][h];
-			
-			for (int i = 0; i < w; ++i) {
-				for (int j = 0; j < h; ++j) {
-					if (sc.hasNextInt()) {
-						data[i][j] = sc.nextInt();
-					} else
-					{
-						throw new MatrixWrongDataException("Not found next int in file");
-					}
-				}
-			}
+			readMatrixWithScanner(sc);
 			
 			sc.close();
 			reader.close();
@@ -96,8 +61,43 @@ public class Matrix {
 		} catch (IOException ignore) { 
 			throw new MatrixIOException("File don't closed");
 		}
+	}
+	
+	
+	public void readMatrixWithScanner(Scanner sc) throws MatrixWrongDataException {
+		if (sc.hasNextInt()) {
+			w = sc.nextInt();
+			if (w < 0) {
+				throw new MatrixWrongDataException("Width should be non-negative");
+			}
+		} else
+		{
+			throw new MatrixWrongDataException("Not found width in file");
+			
+		}
 		
+		if (sc.hasNextInt()) {
+			h = sc.nextInt();
+			if (h < 0) {
+				throw new MatrixWrongDataException("Heigth should be non-negative");
+			}
+		} else
+		{
+			throw new MatrixWrongDataException("Not found height in file");
+		}
 		
+		data = new int[w][h];
+		
+		for (int i = 0; i < w; ++i) {
+			for (int j = 0; j < h; ++j) {
+				if (sc.hasNextInt()) {
+					data[i][j] = sc.nextInt();
+				} else
+				{
+					throw new MatrixWrongDataException("Not found next int in file");
+				}
+			}
+		}
 	}
 	
 	public Matrix(int a, int b) {
@@ -106,35 +106,28 @@ public class Matrix {
 		data = new int[a][b];
 	}
 	
+	public Matrix() {
+		this(0, 0);
+	}
+	
 	void write(File file) throws MatrixIOException {
-		DataOutputStream writer = null;
+		PrintWriter writer = null;
 		try {
-			writer = new DataOutputStream(new FileOutputStream(file));
+			writer = new PrintWriter(file);
 
-			try {
-				writer.writeChars(w + " " + h + "\n");
-				for (int i = 0; i < w; ++i) {
-					for (int j = 0; j < h; ++j) {
-						writer.writeInt(data[i][j]);
-						writer.writeChars(" ");
-						
-					}
-					writer.writeChars("\n");
+			writer.println(w + " " + h);
+			for (int i = 0; i < w; ++i) {
+				for (int j = 0; j < h; ++j) {
+					writer.print(data[i][j]);
+					writer.print(" ");
+					
 				}
-			} catch (IOException e) {
-				throw new MatrixIOException("Error writing in file", e);
+				writer.println();
 			}
 			
 			writer.close();
 		} catch (FileNotFoundException e) {
 			throw new MatrixFileNotFoundException("File " + file.getName() + " not found", e);
-		} catch (MatrixIOException e) {
-			try {
-				writer.close();
-			} catch (IOException ignore) { }
-			throw e;
-		} catch (IOException ignore) { 
-			throw new MatrixIOException("File don't closed");
 		}
 	}
 	
