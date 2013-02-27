@@ -1,8 +1,10 @@
 package ru.ifmo.ctddev.evdokimov.task2;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -79,6 +81,7 @@ public class Matrix {
 				}
 			}
 			
+			sc.close();
 			reader.close();
 		} catch (FileNotFoundException e) {
 			throw new MatrixFileNotFoundException("File " + file.getName() + " not found", e);
@@ -98,6 +101,38 @@ public class Matrix {
 		w = a;
 		h = b;
 		data = new int[a][b];
+	}
+	
+	void write(File file) throws MatrixIOException {
+		FileWriter writer = null;
+		try {
+			writer = new FileWriter(file);
+
+			try {
+				writer.write(w + " " + h + "\n");
+				for (int i = 0; i < w; ++i) {
+					for (int j = 0; j < h; ++j) {
+						writer.write(String.valueOf(data[i][j]));
+						writer.write(" ");
+						
+					}
+					writer.write("\n");
+				}
+			} catch (IOException e) {
+				throw new MatrixIOException("Error writing in file", e);
+			}
+			
+			writer.close();
+		} catch (FileNotFoundException e) {
+			throw new MatrixFileNotFoundException("File " + file.getName() + " not found", e);
+		} catch (MatrixIOException e) {
+			try {
+				writer.close();
+			} catch (IOException ignore) { }
+			throw e;
+		} catch (IOException ignore) { 
+			throw new MatrixIOException("File don't closed");
+		}
 	}
 	
 	public Matrix transpose() {

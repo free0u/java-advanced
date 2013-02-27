@@ -16,6 +16,9 @@ public class Main {
 		Matrix A = new Matrix(file);
 		System.out.println(A);
 		
+		File fout = new File("out.txt");
+		A.write(fout);
+		
 //		int[][] a = { 
 //				{1, 2},
 //				{3, 4}
