@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class Main {
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws MatrixIOException {
 //		if (args.length == 0) {
 //			throw new IllegalArgumentException("need name of file");
 //		}

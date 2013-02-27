@@ -2,6 +2,8 @@ package ru.ifmo.ctddev.evdokimov.task2;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Matrix {
@@ -37,17 +39,59 @@ public class Matrix {
 		}
 	}
 
-	public Matrix (File file) throws FileNotFoundException {
-		Scanner sc = new Scanner(file);
-		w = sc.nextInt();
-		h = sc.nextInt();
-		data = new int[w][h];
-		
-		for (int i = 0; i < w; ++i) {
-			for (int j = 0; j < h; ++j) {
-				data[i][j] = sc.nextInt();
+	public Matrix(File file) throws MatrixIOException {
+		FileReader reader = null;
+		try {
+			reader = new FileReader(file);
+			Scanner sc = new Scanner(reader);
+			
+			if (sc.hasNextInt()) {
+				w = sc.nextInt();
+				if (w < 0) {
+					throw new MatrixWrongDataException("Width should be non-negative");
+				}
+			} else
+			{
+				throw new MatrixWrongDataException("Not found width in file");
+				
 			}
+			
+			if (sc.hasNextInt()) {
+				h = sc.nextInt();
+				if (h < 0) {
+					throw new MatrixWrongDataException("Heigth should be non-negative");
+				}
+			} else
+			{
+				throw new MatrixWrongDataException("Not found height in file");
+			}
+			
+			data = new int[w][h];
+			
+			for (int i = 0; i < w; ++i) {
+				for (int j = 0; j < h; ++j) {
+					if (sc.hasNextInt()) {
+						data[i][j] = sc.nextInt();
+					} else
+					{
+						throw new MatrixWrongDataException("Not found next int in file");
+					}
+				}
+			}
+			
+			reader.close();
+		} catch (FileNotFoundException e) {
+			throw new MatrixFileNotFoundException("File " + file.getName() + " not found", e);
+		} catch (MatrixIOException e) {
+			try {
+				reader.close();
+			} catch (IOException ignore) { }
+			throw e;
+		} catch (IOException ignore) { 
+			throw new MatrixIOException("File don't closed");
 		}
+		
+		
 	}
 	
 	public Matrix(int a, int b) {
@@ -141,13 +185,14 @@ public class Matrix {
 	}
 
 	public String toString() {
-		String res = "";
+		StringBuilder res = new StringBuilder();
 		for (int i = 0; i < w; ++i) {
 			for (int j = 0; j < h; ++j) {
-				res += data[i][j] + " ";
+				res.append(data[i][j]);
+				res.append(" ");
 			}
-			res += "\n";
+			res.append("\n");
 		}
-		return res;
+		return res.toString();
 	}
 }
