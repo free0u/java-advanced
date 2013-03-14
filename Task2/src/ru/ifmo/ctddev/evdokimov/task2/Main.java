@@ -17,15 +17,20 @@ public class Main {
 		try {
 			Matrix A = new Matrix();
 			Matrix B = new Matrix();
+			Matrix C = new Matrix();
 			
 			File file = new File(fileNameInput);
 			Scanner sc = new Scanner(file);
+			
 			A.readMatrixWithScanner(sc);
 			B.readMatrixWithScanner(sc);
-			Matrix C = A.multiply(B);
+			C.readMatrixWithScanner(sc);
+			
+			// A^2 + B + C
+			Matrix res = A.multiply(A).add(B.multiply(C));
 			
 			File fout = new File(fileNameOutput);
-			C.write(fout);
+			res.write(fout);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (MatrixWrongDataException e) {
