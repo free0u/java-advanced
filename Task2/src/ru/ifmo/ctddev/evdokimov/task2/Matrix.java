@@ -28,7 +28,7 @@ public class Matrix {
 				throw new MatrixWrongOperandException(String.format("Matrix contain null row: %d", i));
 			}
 			if (h != data[i].length) {
-				throw new MatrixWrongOperandException("Matrix is not rectangle");
+				throw new MatrixWrongOperandException(String.format("Matrix is not rectangle. Different size in %d row", i));
 			}
 		}
 
@@ -47,24 +47,32 @@ public class Matrix {
 			reader = new FileReader(file);
 			Scanner sc = new Scanner(reader);
 			
-			readMatrixWithScanner(sc);
+			readMatrix(sc);
 			
-			sc.close();
 			reader.close();
 		} catch (FileNotFoundException e) {
 			throw new MatrixFileNotFoundException("File " + file.getName() + " not found", e);
 		} catch (MatrixIOException e) {
 			try {
-				reader.close();
+				if (reader != null) {
+					reader.close();
+				}
 			} catch (IOException ignore) { }
+			
 			throw e;
-		} catch (IOException ignore) { 
-			throw new MatrixIOException("File don't closed");
+		} catch (IOException e) { 
+			try {
+				if (reader != null) {
+					reader.close();
+				}
+			} catch (IOException ignore) {}
+			
+			throw new MatrixIOException(e.getMessage(), e);
 		}
 	}
 	
 	
-	public void readMatrixWithScanner(Scanner sc) throws MatrixWrongDataException {
+	public void readMatrix(Scanner sc) throws MatrixWrongDataException {
 		if (sc.hasNextInt()) {
 			w = sc.nextInt();
 			if (w < 0) {
@@ -79,7 +87,7 @@ public class Matrix {
 		if (sc.hasNextInt()) {
 			h = sc.nextInt();
 			if (h < 0) {
-				throw new MatrixWrongDataException("Heigth should be non-negative");
+				throw new MatrixWrongDataException("Height should be non-negative");
 			}
 		} else
 		{
@@ -110,8 +118,9 @@ public class Matrix {
 		this(0, 0);
 	}
 	
-	void write(File file) throws MatrixIOException {
+	boolean write(File file) throws MatrixIOException {
 		PrintWriter writer = null;
+		boolean res = true;
 		try {
 			writer = new PrintWriter(file);
 
@@ -125,10 +134,17 @@ public class Matrix {
 				writer.println();
 			}
 			
+			if (writer.checkError()) {
+				res = false;
+			}
+			
 			writer.close();
-		} catch (FileNotFoundException e) {
+		} 
+		catch (FileNotFoundException e) {
 			throw new MatrixFileNotFoundException("File " + file.getName() + " not found", e);
 		}
+		
+		return res;
 	}
 	
 	public Matrix transpose() {

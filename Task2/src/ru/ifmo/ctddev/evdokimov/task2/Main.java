@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Main {
-	public static void main(String[] args) throws FileNotFoundException, MatrixIOException {
+	public static void main(String[] args) {
 		if (args.length < 2) {
 			throw new IllegalArgumentException("Need names of file");
 		}
@@ -22,11 +22,11 @@ public class Main {
 			File file = new File(fileNameInput);
 			Scanner sc = new Scanner(file);
 			
-			A.readMatrixWithScanner(sc);
-			B.readMatrixWithScanner(sc);
-			C.readMatrixWithScanner(sc);
+			A.readMatrix(sc);
+			B.readMatrix(sc);
+			C.readMatrix(sc);
 			
-			// A^2 + B + C
+			// A^2 + B * C
 			Matrix res = A.multiply(A).add(B.multiply(C));
 			
 			File fout = new File(fileNameOutput);
