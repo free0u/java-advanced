@@ -2,42 +2,41 @@ package ru.ifmo.ctddev.evdokimov.task2;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
 	public static void main(String[] args) {
 		if (args.length < 2) {
-			throw new IllegalArgumentException("Need names of file");
+			throw new IllegalArgumentException("Need names of files");
 		}
 		
 		String fileNameInput = args[0];
 		String fileNameOutput = args[1];
 		
-		
 		try {
-			Matrix A = new Matrix();
-			Matrix B = new Matrix();
-			Matrix C = new Matrix();
+			Scanner sc = new Scanner(new File(fileNameInput));
 			
-			File file = new File(fileNameInput);
-			Scanner sc = new Scanner(file);
+			try {
+				Matrix A = new Matrix(sc);
+				Matrix B = new Matrix(sc);
+				Matrix C = new Matrix(sc);
+				
+				Matrix res = A.multiply(A).add(B.multiply(C));
+				
+				res.write(new File(fileNameOutput));
+				
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+				sc.close();
+			}
 			
-			A.readMatrix(sc);
-			B.readMatrix(sc);
-			C.readMatrix(sc);
-			
-			// A^2 + B * C
-			Matrix res = A.multiply(A).add(B.multiply(C));
-			
-			File fout = new File(fileNameOutput);
-			res.write(fout);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (MatrixWrongDataException e) {
-			e.printStackTrace();
-		} catch (MatrixIOException e) {
-			e.printStackTrace();
 		}
+		
+
 	}
 
 }

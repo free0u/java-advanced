@@ -9,5 +9,4 @@ public class MatrixWrongOperandException extends RuntimeException {
 		super(message, cause);
 	}
 	
-	
 }
