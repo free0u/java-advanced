@@ -1,14 +1,13 @@
 package ru.ifmo.ctddev.evdokimov.task3;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.AbstractCollection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class Bag extends AbstractCollection<Object> {
@@ -23,34 +22,94 @@ public class Bag extends AbstractCollection<Object> {
 
 	private class BagIterator implements Iterator<Object> {
 		int expectedModCount;
-		Object currentValue, nextValue;
+		Object currentValue;
+		
+		Iterator<Entry<Object, List<Object>>> keysIterator;
+		Iterator<Object> listIterator, currentListIterator;
+		
+		boolean removePossible, hasNextValue;
 		
 		public BagIterator() {
 			expectedModCount = modCount;
-			// TODO stub
+			
+			hasNextValue = false;
+			for (keysIterator = data.entrySet().iterator(); keysIterator.hasNext(); ) {
+				Entry<Object, List<Object>> entry = keysIterator.next();
+				List<Object> list = entry.getValue();
+				
+				if (!list.isEmpty()) {
+					listIterator = list.iterator();
+					hasNextValue = true;
+					break;
+				}
+			}
+		}
+		
+		public BagIterator(Object e) {
+			expectedModCount = modCount;
+			
+			hasNextValue = false;
+			for (keysIterator = data.entrySet().iterator(); keysIterator.hasNext(); ) {
+				Entry<Object, List<Object>> entry = keysIterator.next();
+				if (entry.getKey() != e) {
+					continue;
+				}
+				List<Object> list = entry.getValue();
+				
+				if (!list.isEmpty()) {
+					listIterator = list.iterator();
+					hasNextValue = true;
+					break;
+				}
+			}
 		}
 
 		@Override
 		public boolean hasNext() {
-			return nextValue != null;
+			return hasNextValue;
 		}
 
 		@Override
 		public Object next() {
-			// TODO Auto-generated method stub
-			return null;
+			if (modCount != expectedModCount) {
+                throw new ConcurrentModificationException();
+			}
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+			currentValue = listIterator.next();
+			currentListIterator = listIterator;
+			
+			hasNextValue = false;
+			if (listIterator.hasNext()) {
+				hasNextValue = true;
+			} else {
+				while (keysIterator.hasNext()) {
+					Entry<Object, List<Object>> entry = keysIterator.next();
+					List<Object> list = entry.getValue();
+					
+					if (!list.isEmpty()) {
+						listIterator = list.iterator();
+						hasNextValue = true;
+						break;
+					}
+				}
+			}
+			
+			removePossible = true;
+			return currentValue;
 		}
 
 		@Override
 		public void remove() {
-			if (currentValue == null) {
+			if (!removePossible) {
 				throw new IllegalStateException();
 			}
 			if (expectedModCount != modCount) {
 				throw new ConcurrentModificationException();
 			}
-			// TODO delete
-			// TODO Auto-generated method stub
+			currentListIterator.remove(); 
+			removePossible = false;
 		}
 
 	}
@@ -61,7 +120,7 @@ public class Bag extends AbstractCollection<Object> {
 		if (data.containsKey(e)) {
 			list = data.get(e);
 		} else {
-			list = new ArrayList<>();
+			list = new LinkedList<>();
 		}
 		list.add(e);
 		data.put(e, list);
@@ -81,17 +140,18 @@ public class Bag extends AbstractCollection<Object> {
 	
 	@Override
 	public boolean contains(Object e) {
-		return data.containsKey(e);
+		if (data.containsKey(e)) {
+			return !data.get(e).isEmpty();
+		}
+		return false;
 	}
 	
 	@Override
 	public boolean remove(Object e) {
 		if (contains(e)) {
-			List<Object> list = data.get(e);
-			list.remove(list.size() - 1);
-			if (list.isEmpty()) {
-				data.remove(e);
-			}
+			BagIterator it = new BagIterator(e);
+			it.next();
+			it.remove();
 			cntElements--;
 			modCount++;
 			return true;
