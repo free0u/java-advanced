@@ -1,12 +1,14 @@
 package ru.ifmo.ctddev.evdokimov.task3;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Random;
+
 
 public class Main {
-	public static void printBag(Bag bag) {
+	public static void print(Collection<Object> c) {
 		String s = "(";
-		for (Object i : bag) {
+		for (Object i : c) {
 			s += i + ", ";
 		}
 		s += ")";
@@ -15,8 +17,7 @@ public class Main {
 	
 	
 	public static void main(String[] args) {
-		Bag bag = new Bag();
-		Random random = new Random();
+		LinkedBag bag = new LinkedBag();
 		
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 2; ++j) {
@@ -25,13 +26,44 @@ public class Main {
 			
 		}
 		
-		printBag(bag);	
+		
+		for (int i = 0; i < 5; ++i) {
+			bag.remove(i);
+		}
+		for (int i = 0; i < 5; ++i) {
+			bag.remove(i);
+		}
+		
+		
+		print(bag);
+		bag.clear();
+		
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				bag.add(10 - i);
+			}
+			
+		}
+		
+		print(bag);	
 		for (Iterator<Object> it = bag.iterator(); it.hasNext(); ) {
 			it.next();
 			it.remove();
-			printBag(bag);
+			print(bag);
 		}
 		
+		
+		System.out.println("=------------=");
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		for (int i = 0; i < 10; i++) {
+			list.add(9 - i);
+		}
+		
+		bag.addAll(list);
+		
+		for (Object i : bag) {
+			System.out.println(i);
+		}
 
 	}
 }
