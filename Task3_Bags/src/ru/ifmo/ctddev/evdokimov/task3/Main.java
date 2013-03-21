@@ -17,7 +17,7 @@ public class Main {
 	
 	
 	public static void main(String[] args) {
-		LinkedBag bag = new LinkedBag();
+		Bag bag = new Bag();
 		
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 2; ++j) {
@@ -30,12 +30,22 @@ public class Main {
 		for (int i = 0; i < 5; ++i) {
 			bag.remove(i);
 		}
+		print(bag);
 		for (int i = 0; i < 5; ++i) {
 			bag.remove(i);
 		}
 		
 		
 		print(bag);
+		
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				bag.add(i);
+			}
+			
+		}
+		print(bag);
+		System.out.println("=------------=");
 		bag.clear();
 		
 		for (int i = 0; i < 3; ++i) {
