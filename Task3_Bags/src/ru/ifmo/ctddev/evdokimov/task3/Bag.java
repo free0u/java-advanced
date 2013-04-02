@@ -4,6 +4,8 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.AbstractCollection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
@@ -11,17 +13,22 @@ public class Bag extends AbstractCollection<Object> {
 	protected long cntElements;
 	protected int modCount;
 
-	protected HashMap<Object, MyLinkedList> data;
+	protected HashMap<Object, List<Object>> data;
 	
 	public Bag() {
-		data = new HashMap<Object, MyLinkedList>();
+		data = new HashMap<Object, List<Object>>();
+	}
+
+	public Bag(List<?> list) {
+		this();
+		addAll(list);
 	}
 
 	private class BagIterator implements Iterator<Object> {
 		int expectedModCount;
 		Object currentValue;
 		
-		Iterator<Entry<Object, MyLinkedList>> keysIterator;
+		Iterator<Entry<Object, List<Object>>> keysIterator;
 		Iterator<Object> listIterator, currentListIterator;
 		
 		boolean removePossible, hasNextValue;
@@ -31,8 +38,8 @@ public class Bag extends AbstractCollection<Object> {
 			
 			hasNextValue = false;
 			for (keysIterator = data.entrySet().iterator(); keysIterator.hasNext(); ) {
-				Entry<Object, MyLinkedList> entry = keysIterator.next();
-				MyLinkedList list = entry.getValue();
+				Entry<Object, List<Object>> entry = keysIterator.next();
+				List<Object> list = entry.getValue();
 				
 				if (!list.isEmpty()) {
 					listIterator = list.iterator();
@@ -47,11 +54,11 @@ public class Bag extends AbstractCollection<Object> {
 			
 			hasNextValue = false;
 			for (keysIterator = data.entrySet().iterator(); keysIterator.hasNext(); ) {
-				Entry<Object, MyLinkedList> entry = keysIterator.next();
+				Entry<Object, List<Object>> entry = keysIterator.next();
 				if (entry.getKey() != e) {
 					continue;
 				}
-				MyLinkedList list = entry.getValue();
+				List<Object> list = entry.getValue();
 				
 				if (!list.isEmpty()) {
 					listIterator = list.iterator();
@@ -82,8 +89,8 @@ public class Bag extends AbstractCollection<Object> {
 				hasNextValue = true;
 			} else {
 				while (keysIterator.hasNext()) {
-					Entry<Object, MyLinkedList> entry = keysIterator.next();
-					MyLinkedList list = entry.getValue();
+					Entry<Object, List<Object>> entry = keysIterator.next();
+					List<Object> list = entry.getValue();
 					
 					if (!list.isEmpty()) {
 						listIterator = list.iterator();
@@ -106,6 +113,7 @@ public class Bag extends AbstractCollection<Object> {
 				throw new ConcurrentModificationException();
 			}
 			currentListIterator.remove(); 
+			Bag.this.cntElements--;
 			removePossible = false;
 		}
 
@@ -113,11 +121,11 @@ public class Bag extends AbstractCollection<Object> {
 	
 	@Override
 	public boolean add(Object e) {
-		MyLinkedList list;
+		List<Object> list;
 		if (data.containsKey(e)) {
 			list = data.get(e);
 		} else {
-			list = new MyLinkedList();
+			list = new LinkedList<Object>();
 		}
 		list.add(e);
 		data.put(e, list);
@@ -132,7 +140,7 @@ public class Bag extends AbstractCollection<Object> {
 	public void clear() {
 		cntElements = 0;
 		modCount = 0;
-		data = new HashMap<Object, MyLinkedList>();
+		data = new HashMap<Object, List<Object>>();
 	}
 	
 	@Override
