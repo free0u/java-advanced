@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.AbstractCollection;
 import java.util.LinkedList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -13,10 +14,10 @@ public class Bag extends AbstractCollection<Object> {
 	protected long cntElements;
 	protected int modCount;
 
-	protected HashMap<Object, List<Object>> data;
+	protected HashMap<Object, LinkedList<Object>> data;
 	
 	public Bag() {
-		data = new HashMap<Object, List<Object>>();
+		data = new HashMap<Object, LinkedList<Object>>();
 	}
 
 	public Bag(List<?> list) {
@@ -26,51 +27,28 @@ public class Bag extends AbstractCollection<Object> {
 
 	private class BagIterator implements Iterator<Object> {
 		int expectedModCount;
-		Object currentValue;
 		
-		Iterator<Entry<Object, List<Object>>> keysIterator;
-		Iterator<Object> listIterator, currentListIterator;
+		Iterator<Entry<Object, LinkedList<Object>>> keysIterator;
+		Iterator<Object> listIterator;
 		
-		boolean removePossible, hasNextValue;
+		Object currentKey;
 		
 		public BagIterator() {
 			expectedModCount = modCount;
-			
-			hasNextValue = false;
-			for (keysIterator = data.entrySet().iterator(); keysIterator.hasNext(); ) {
-				Entry<Object, List<Object>> entry = keysIterator.next();
-				List<Object> list = entry.getValue();
-				
-				if (!list.isEmpty()) {
-					listIterator = list.iterator();
-					hasNextValue = true;
-					break;
-				}
-			}
-		}
-		
-		public BagIterator(Object e) {
-			expectedModCount = modCount;
-			
-			hasNextValue = false;
-			for (keysIterator = data.entrySet().iterator(); keysIterator.hasNext(); ) {
-				Entry<Object, List<Object>> entry = keysIterator.next();
-				if (entry.getKey() != e) {
-					continue;
-				}
-				List<Object> list = entry.getValue();
-				
-				if (!list.isEmpty()) {
-					listIterator = list.iterator();
-					hasNextValue = true;
-					break;
-				}
-			}
+			keysIterator = data.entrySet().iterator();
 		}
 
 		@Override
 		public boolean hasNext() {
-			return hasNextValue;
+			if (keysIterator.hasNext()) {
+				return true;
+			} else {
+				if (listIterator != null && listIterator.hasNext()) {
+					return true;
+				}
+			}
+			
+			return false;
 		}
 
 		@Override
@@ -81,58 +59,47 @@ public class Bag extends AbstractCollection<Object> {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-			currentValue = listIterator.next();
-			currentListIterator = listIterator;
-			
-			hasNextValue = false;
-			if (listIterator.hasNext()) {
-				hasNextValue = true;
-			} else {
-				while (keysIterator.hasNext()) {
-					Entry<Object, List<Object>> entry = keysIterator.next();
-					List<Object> list = entry.getValue();
-					
-					if (!list.isEmpty()) {
-						listIterator = list.iterator();
-						hasNextValue = true;
-						break;
-					}
-				}
+
+			if (listIterator == null || !listIterator.hasNext()) {
+				Entry<Object, LinkedList<Object>> entry = keysIterator.next();
+				currentKey = entry.getKey();
+				listIterator = entry.getValue().iterator();
 			}
 			
-			removePossible = true;
-			return currentValue;
+			return listIterator.next();
 		}
 
 		@Override
 		public void remove() {
-			if (!removePossible) {
-				throw new IllegalStateException();
-			}
 			if (expectedModCount != modCount) {
 				throw new ConcurrentModificationException();
 			}
-			currentListIterator.remove(); 
+			
+			if (listIterator == null) {
+				throw new IllegalStateException();
+			}
+			listIterator.remove();
+			
+			if (data.get(currentKey).isEmpty()) {
+				keysIterator.remove();
+			}
+			
 			Bag.this.cntElements--;
-			removePossible = false;
 		}
 
 	}
 	
 	@Override
 	public boolean add(Object e) {
-		List<Object> list;
 		if (data.containsKey(e)) {
-			list = data.get(e);
+			data.get(e).add(e);
 		} else {
-			list = new LinkedList<Object>();
+			LinkedList<Object> LinkedList = new LinkedList<Object>();
+			LinkedList.add(e);
+			data.put(e, LinkedList);
 		}
-		list.add(e);
-		data.put(e, list);
-		
 		cntElements++;
 		modCount++;
-		
 		return true;
 	}
 
@@ -140,23 +107,22 @@ public class Bag extends AbstractCollection<Object> {
 	public void clear() {
 		cntElements = 0;
 		modCount = 0;
-		data = new HashMap<Object, List<Object>>();
+		data = new HashMap<Object, LinkedList<Object>>();
 	}
 	
 	@Override
 	public boolean contains(Object e) {
-		if (data.containsKey(e)) {
-			return !data.get(e).isEmpty();
-		}
-		return false;
+		return data.containsKey(e);
 	}
 	
 	@Override
 	public boolean remove(Object e) {
 		if (contains(e)) {
-			BagIterator it = new BagIterator(e);
-			it.next();
-			it.remove();
+			LinkedList<Object> LinkedList = (LinkedList<Object>) data.get(e);
+			LinkedList.removeLast();
+			if (LinkedList.isEmpty()) {
+				data.remove(e);
+			}
 			cntElements--;
 			modCount++;
 			return true;
