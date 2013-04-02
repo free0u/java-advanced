@@ -10,13 +10,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 
-import ru.ifmo.ctddev.evdokimov.task3.Bag.BagIterator;
 
 public class LinkedBag extends AbstractCollection<Object> {
 	private long cntElements;
 	private int modCount;
 
-	private HashMap<Object, ArrayList<Object>> data;
+	private HashMap<Object, ArrayList<Node>> data;
 	Node begin, end;
 	
 	private class Node {
@@ -33,10 +32,9 @@ public class LinkedBag extends AbstractCollection<Object> {
 	
 	
 	public LinkedBag() {
-		data = new HashMap<Object, ArrayList<Object>>();
-
-		Node begin = new Node(null, -1, null);
-		Node end = begin;
+		data = new HashMap<Object, ArrayList<Node>>();
+		begin = new Node(null, -1, null);
+		end = begin;
 	}
 
 	public LinkedBag(List<?> list) {
@@ -46,28 +44,18 @@ public class LinkedBag extends AbstractCollection<Object> {
 
 	private class LinkedBagIterator implements Iterator<Object> {
 		int expectedModCount;
+		Node currentNode;
 		
-		Iterator<Entry<Object, LinkedList<Object>>> keysIterator;
-		Iterator<Object> listIterator;
-		
-		Object currentKey;
+		boolean removePossible;
 		
 		public LinkedBagIterator() {
 			expectedModCount = modCount;
-			keysIterator = data.entrySet().iterator();
+			currentNode = begin;
 		}
 
 		@Override
 		public boolean hasNext() {
-			if (keysIterator.hasNext()) {
-				return true;
-			} else {
-				if (listIterator != null && listIterator.hasNext()) {
-					return true;
-				}
-			}
-			
-			return false;
+			return currentNode.next != null;
 		}
 
 		@Override
@@ -78,14 +66,10 @@ public class LinkedBag extends AbstractCollection<Object> {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-
-			if (listIterator == null || !listIterator.hasNext()) {
-				Entry<Object, LinkedList<Object>> entry = keysIterator.next();
-				currentKey = entry.getKey();
-				listIterator = entry.getValue().iterator();
-			}
+			removePossible = true;
 			
-			return listIterator.next();
+			currentNode = currentNode.next;
+			return currentNode.value;
 		}
 
 		@Override
@@ -93,25 +77,40 @@ public class LinkedBag extends AbstractCollection<Object> {
 			if (expectedModCount != modCount) {
 				throw new ConcurrentModificationException();
 			}
-			
-			if (listIterator == null) {
+			if (!removePossible) {
 				throw new IllegalStateException();
 			}
-			listIterator.remove();
-			
-			if (data.get(currentKey).isEmpty()) {
-				keysIterator.remove();
+			removePossible = false;
+
+			if (currentNode.next != null) {
+				currentNode.next.prev = currentNode.prev;
 			}
+			currentNode.prev.next = currentNode.next;
+
+			ArrayList<Node> list = data.get(currentNode.value);
+			list.set(currentNode.index, list.get(list.size() - 1));
+			list.get(currentNode.index).index = currentNode.index;
 			
-			Bag.this.cntElements--;
+			list.remove(list.size() - 1);
+			if (list.isEmpty()) {
+				data.remove(currentNode.value);
+			}
+			currentNode = currentNode.prev;
+			LinkedBag.this.cntElements--;
 		}
 
 	}
 	
 	@Override
 	public boolean add(Object e) {
-		// TODO add
-		
+		if (!contains(e)) {
+			data.put(e,  new ArrayList<Node>());
+		}
+		ArrayList<Node> list = data.get(e);
+		Node node = new Node(e, list.size(), end);
+		end.next = node;
+		end = node;
+		list.add(node);
 		
 		cntElements++;
 		modCount++;
@@ -122,7 +121,9 @@ public class LinkedBag extends AbstractCollection<Object> {
 	public void clear() {
 		cntElements = 0;
 		modCount = 0;
-		data = new HashMap<Object, LinkedList<Object>>();
+		data = new HashMap<Object, ArrayList<Node>>();
+		begin = null;
+		end = null;
 	}
 	
 	@Override
@@ -133,11 +134,19 @@ public class LinkedBag extends AbstractCollection<Object> {
 	@Override
 	public boolean remove(Object e) {
 		if (contains(e)) {
-			LinkedList<Object> LinkedList = (LinkedList<Object>) data.get(e);
-			LinkedList.removeLast();
-			if (LinkedList.isEmpty()) {
+			ArrayList<Node> list = data.get(e);
+			Node node = list.get(list.size() - 1);
+			
+			if (node.next != null) {
+				node.next.prev = node.prev;
+			}
+			node.prev.next = node.next;
+			
+			list.remove(list.size() - 1);
+			if (list.isEmpty()) {
 				data.remove(e);
 			}
+			
 			cntElements--;
 			modCount++;
 			return true;
@@ -148,7 +157,7 @@ public class LinkedBag extends AbstractCollection<Object> {
 	
 	@Override
 	public Iterator<Object> iterator() {
-		return new BagIterator();
+		return new LinkedBagIterator();
 	}
 
 	@Override
