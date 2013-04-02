@@ -1,21 +1,14 @@
 package ru.ifmo.ctddev.evdokimov.task3;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
+import junit.framework.Assert;
+
 
 public class Main {
-	public static void print(Collection<Object> c) {
-		String s = "(";
-		for (Object i : c) {
-			s += i + ", ";
-		}
-		s += ")";
-		System.out.println(s);
-	}
-	
-	
 	public static void main(String[] args) {
 		Bag bag = new Bag();
 		
@@ -26,17 +19,18 @@ public class Main {
 			
 		}
 		
+		System.out.println(bag);
 		
 		for (int i = 0; i < 5; ++i) {
 			bag.remove(i);
 		}
-		print(bag);
+		System.out.println(bag);
 		for (int i = 0; i < 5; ++i) {
 			bag.remove(i);
 		}
 		
 		
-		print(bag);
+		System.out.println(bag);
 		
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 2; ++j) {
@@ -44,7 +38,7 @@ public class Main {
 			}
 			
 		}
-		print(bag);
+		System.out.println(bag);
 		System.out.println("=------------=");
 		bag.clear();
 		
@@ -55,11 +49,11 @@ public class Main {
 			
 		}
 		
-		print(bag);	
+		System.out.println(bag);	
 		for (Iterator<Object> it = bag.iterator(); it.hasNext(); ) {
 			it.next();
 			it.remove();
-			print(bag);
+			System.out.println(bag);
 		}
 		
 		
