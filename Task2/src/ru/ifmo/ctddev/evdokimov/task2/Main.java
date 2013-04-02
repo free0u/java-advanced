@@ -2,6 +2,7 @@ package ru.ifmo.ctddev.evdokimov.task2;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -26,6 +27,8 @@ public class Main {
 				res.write(new File(fileNameOutput));
 				
 			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 				sc.close();

@@ -1,8 +1,11 @@
 package ru.ifmo.ctddev.evdokimov.task2;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Scanner;
 
 public class Matrix {
@@ -82,22 +85,16 @@ public class Matrix {
 		readMatrix(sc);
 	}
 	
-	boolean write(File file) throws FileNotFoundException {
-		PrintWriter pw = new PrintWriter(file);
-		
-		pw.println(w + " " + h);
-		for (int i = 0; i < w; i++) {
-			for (int j = 0; j < h; j++) {
-				pw.print(data[i][j]);
-				pw.print(" ");
-			}
-			pw.println();
-		}
-		
-		boolean result = pw.checkError();
-		pw.close();
-		
-		return result;
+	void write(File file) throws IOException {
+		try (Writer out = new BufferedWriter(new FileWriter(file))) {
+            out.write(w + " " + h + "\n");
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    out.write(Integer.toString(data[i][j]) + ' ');
+                }
+                out.write("\n");
+            }
+        }
 	}
 	
 	public Matrix(int a, int b) {
