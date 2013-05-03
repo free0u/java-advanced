@@ -2,11 +2,10 @@ package ru.ifmo.ctddev.evdokimov.task5;
 
 public class Invoker {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		if (args.length < 2) {
+			System.out.println("Usage: Invoker <full-class-name> <method-name> <method-arg...>");
+			return;
+		}
 	}
-
 }
