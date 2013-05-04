@@ -22,9 +22,7 @@ public class Invoker {
 			
 			int mod = c.getModifiers();
 			
-			if (Modifier.isStatic(mod)) {
-				System.out.println(String.format("Class %s is static", className));
-			} else if (Modifier.isInterface(mod)) {
+			if (Modifier.isInterface(mod)) {
 				System.out.println(String.format("Class %s is interface", className));
 			} else if (Modifier.isAbstract(mod)) {
 				System.out.println(String.format("Class %s is abstract", className));
@@ -32,11 +30,12 @@ public class Invoker {
 				Object loadClass;
 				try {
 					loadClass = c.newInstance();
-				} catch (InstantiationException ignore) {
-					ignore.printStackTrace();
+				} catch (InstantiationException e) {
+					System.out.format("Class %s don't have ctor", className);
+					e.printStackTrace();
 					return;
 				} catch (IllegalAccessException e) {
-					System.out.println(String.format("Class %s don't have ctor", className));
+					System.out.println(String.format("Class %s or its nullary ctor is not accessible", className));
 					e.printStackTrace();
 					return;
 				}
