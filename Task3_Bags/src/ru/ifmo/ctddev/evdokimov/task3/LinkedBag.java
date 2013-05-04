@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 
@@ -15,7 +16,7 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 	private long cntElements;
 	private int modCount;
 
-	private HashMap<E, ArrayList<Node>> data;
+	private Map<E, List<Node>> data;
 	Node begin, end;
 	
 	private class Node {
@@ -30,9 +31,8 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 		}
 	}
 	
-	
 	public LinkedBag() {
-		data = new HashMap<E, ArrayList<Node>>();
+		data = new HashMap<E, List<Node>>();
 		begin = new Node(null, -1, null);
 		end = begin;
 	}
@@ -40,6 +40,73 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 	public LinkedBag(List<? extends E> list) {
 		this();
 		addAll(list);
+	}
+
+	@Override
+	public boolean add(E e) {
+		if (!contains(e)) {
+			data.put(e,  new ArrayList<Node>());
+		}
+		List<Node> list = data.get(e);
+		Node node = new Node(e, list.size(), end);
+		end.next = node;
+		end = node;
+		list.add(node);
+		
+		cntElements++;
+		modCount++;
+		return true;
+	}
+
+	@Override
+	public void clear() {
+		cntElements = 0;
+		modCount = 0;
+		data.clear();
+		begin = null;
+		end = null;
+	}
+	
+	@Override
+	public boolean contains(Object e) {
+		return data.containsKey(e);
+	}
+	
+	@Override
+	public boolean remove(Object e) {
+		if (!contains(e)) {
+			return false;
+		}
+		List<Node> list = data.get(e);
+		Node node = list.get(list.size() - 1);
+
+		if (node.next != null) {
+			node.next.prev = node.prev;
+		}
+		node.prev.next = node.next;
+
+		list.remove(list.size() - 1);
+		if (list.isEmpty()) {
+			data.remove(e);
+		}
+
+		cntElements--;
+		modCount++;
+		return true;
+	}
+	
+	@Override
+	public Iterator<E> iterator() {
+		return new LinkedBagIterator();
+	}
+
+	@Override
+	public int size() {
+		if (cntElements > Integer.MAX_VALUE) {
+			return Integer.MAX_VALUE;
+		} else {
+			return (int)cntElements;
+		}
 	}
 
 	private class LinkedBagIterator implements Iterator<E> {
@@ -87,7 +154,7 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 			}
 			currentNode.prev.next = currentNode.next;
 
-			ArrayList<Node> list = data.get(currentNode.value);
+			List<Node> list = data.get(currentNode.value);
 			list.set(currentNode.index, list.get(list.size() - 1));
 			list.get(currentNode.index).index = currentNode.index;
 			
@@ -96,77 +163,9 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 				data.remove(currentNode.value);
 			}
 			currentNode = currentNode.prev;
-			LinkedBag.this.cntElements--;
-		}
-
-	}
-	
-	@Override
-	public boolean add(E e) {
-		if (!contains(e)) {
-			data.put(e,  new ArrayList<Node>());
-		}
-		ArrayList<Node> list = data.get(e);
-		Node node = new Node(e, list.size(), end);
-		end.next = node;
-		end = node;
-		list.add(node);
-		
-		cntElements++;
-		modCount++;
-		return true;
-	}
-
-	@Override
-	public void clear() {
-		cntElements = 0;
-		modCount = 0;
-		data = new HashMap<E, ArrayList<Node>>();
-		begin = null;
-		end = null;
-	}
-	
-	@Override
-	public boolean contains(Object e) {
-		return data.containsKey(e);
-	}
-	
-	@Override
-	public boolean remove(Object e) {
-		if (contains(e)) {
-			ArrayList<Node> list = data.get(e);
-			Node node = list.get(list.size() - 1);
-			
-			if (node.next != null) {
-				node.next.prev = node.prev;
-			}
-			node.prev.next = node.next;
-			
-			list.remove(list.size() - 1);
-			if (list.isEmpty()) {
-				data.remove(e);
-			}
-			
 			cntElements--;
-			modCount++;
-			return true;
 		}
-		return false;
+
 	}
 	
-	
-	@Override
-	public Iterator<E> iterator() {
-		return new LinkedBagIterator();
-	}
-
-	@Override
-	public int size() {
-		if (cntElements > Integer.MAX_VALUE) {
-			return Integer.MAX_VALUE;
-		} else {
-			return (int)cntElements;
-		}
-	}
-
 }
