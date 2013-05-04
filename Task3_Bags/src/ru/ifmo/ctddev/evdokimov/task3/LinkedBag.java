@@ -11,19 +11,19 @@ import java.util.NoSuchElementException;
 import java.util.Map.Entry;
 
 
-public class LinkedBag extends AbstractCollection<Object> {
+public class LinkedBag<E> extends AbstractCollection<E> {
 	private long cntElements;
 	private int modCount;
 
-	private HashMap<Object, ArrayList<Node>> data;
+	private HashMap<E, ArrayList<Node>> data;
 	Node begin, end;
 	
 	private class Node {
-		public Object value;
+		public E value;
 		public int index;
 		public Node prev, next;
 	
-		public Node(Object value, int index, Node prev) {
+		public Node(E value, int index, Node prev) {
 			this.value = value;
 			this.index = index;
 			this.prev = prev;
@@ -32,17 +32,17 @@ public class LinkedBag extends AbstractCollection<Object> {
 	
 	
 	public LinkedBag() {
-		data = new HashMap<Object, ArrayList<Node>>();
+		data = new HashMap<E, ArrayList<Node>>();
 		begin = new Node(null, -1, null);
 		end = begin;
 	}
 
-	public LinkedBag(List<?> list) {
+	public LinkedBag(List<? extends E> list) {
 		this();
 		addAll(list);
 	}
 
-	private class LinkedBagIterator implements Iterator<Object> {
+	private class LinkedBagIterator implements Iterator<E> {
 		int expectedModCount;
 		Node currentNode;
 		
@@ -59,7 +59,7 @@ public class LinkedBag extends AbstractCollection<Object> {
 		}
 
 		@Override
-		public Object next() {
+		public E next() {
 			if (modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
 			}
@@ -102,7 +102,7 @@ public class LinkedBag extends AbstractCollection<Object> {
 	}
 	
 	@Override
-	public boolean add(Object e) {
+	public boolean add(E e) {
 		if (!contains(e)) {
 			data.put(e,  new ArrayList<Node>());
 		}
@@ -121,7 +121,7 @@ public class LinkedBag extends AbstractCollection<Object> {
 	public void clear() {
 		cntElements = 0;
 		modCount = 0;
-		data = new HashMap<Object, ArrayList<Node>>();
+		data = new HashMap<E, ArrayList<Node>>();
 		begin = null;
 		end = null;
 	}
@@ -156,7 +156,7 @@ public class LinkedBag extends AbstractCollection<Object> {
 	
 	
 	@Override
-	public Iterator<Object> iterator() {
+	public Iterator<E> iterator() {
 		return new LinkedBagIterator();
 	}
 
