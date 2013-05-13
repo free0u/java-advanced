@@ -13,10 +13,10 @@ import java.util.NoSuchElementException;
 import java.util.Queue;
 
 public class Bag<E> extends AbstractCollection<E> {
-	protected long cntElements;
-	protected int modCount;
+	private long cntElements;
+	private int modCount;
 
-	protected Map<E, Queue<E>> data;
+	private Map<E, Queue<E>> data;
 	
 	public Bag() {
 		data = new HashMap<E, Queue<E>>();
@@ -83,12 +83,12 @@ public class Bag<E> extends AbstractCollection<E> {
 	}
 
 	private class BagIterator implements Iterator<E> {
-		int expectedModCount;
+		private int expectedModCount;
 		
-		Iterator<Entry<E, Queue<E>>> keysIterator;
-		Iterator<E> listIterator;
+		private Iterator<Entry<E, Queue<E>>> keysIterator;
+		private Iterator<E> listIterator;
 		
-		Object currentKey;
+		private Object currentKey;
 		
 		public BagIterator() {
 			expectedModCount = modCount;
