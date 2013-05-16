@@ -2,6 +2,7 @@ package ru.ifmo.ctddev.evdokimov.task3;
 
 import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +18,7 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 	private int modCount;
 
 	private Map<E, List<Node>> data;
-	Node begin, end;
+	private Node begin, end;
 	
 	private class Node {
 		public E value;
@@ -37,7 +38,7 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 		end = begin;
 	}
 
-	public LinkedBag(List<? extends E> list) {
+	public LinkedBag(Collection<? extends E> list) {
 		this();
 		addAll(list);
 	}
@@ -92,6 +93,7 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 
 		cntElements--;
 		modCount++;
+		
 		return true;
 	}
 	
@@ -102,18 +104,14 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 
 	@Override
 	public int size() {
-		if (cntElements > Integer.MAX_VALUE) {
-			return Integer.MAX_VALUE;
-		} else {
-			return (int)cntElements;
-		}
+		return (int)Math.min(cntElements, Integer.MAX_VALUE);
 	}
 
 	private class LinkedBagIterator implements Iterator<E> {
-		int expectedModCount;
-		Node currentNode;
+		private int expectedModCount;
+		private Node currentNode;
 		
-		boolean removePossible;
+		private boolean removePossible;
 		
 		public LinkedBagIterator() {
 			expectedModCount = modCount;
@@ -163,6 +161,8 @@ public class LinkedBag<E> extends AbstractCollection<E> {
 				data.remove(currentNode.value);
 			}
 			currentNode = currentNode.prev;
+			
+			expectedModCount = modCount;
 			cntElements--;
 		}
 

@@ -1,16 +1,15 @@
 package ru.ifmo.ctddev.evdokimov.task3;
 
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Queue;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.AbstractCollection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
-import java.util.Queue;
 
 public class Bag<E> extends AbstractCollection<E> {
 	private long cntElements;
@@ -22,7 +21,7 @@ public class Bag<E> extends AbstractCollection<E> {
 		data = new HashMap<E, Queue<E>>();
 	}
 
-	public Bag(List<? extends E> list) {
+	public Bag(Collection<? extends E> list) {
 		this();
 		addAll(list);
 	}
@@ -32,12 +31,13 @@ public class Bag<E> extends AbstractCollection<E> {
 		if (data.containsKey(e)) {
 			data.get(e).add(e);
 		} else {
-			Queue<E> linkedList = new LinkedList<E>();
-			linkedList.add(e);
-			data.put(e, linkedList);
+			Queue<E> newList = new LinkedList<E>();
+			newList.add(e);
+			data.put(e, newList);
 		}
 		cntElements++;
 		modCount++;
+		
 		return true;
 	}
 
@@ -55,17 +55,18 @@ public class Bag<E> extends AbstractCollection<E> {
 	
 	@Override
 	public boolean remove(Object e) {
-		if (contains(e)) {
-			Queue<E> linkedList = data.get(e);
-			linkedList.remove();
-			if (linkedList.isEmpty()) {
-				data.remove(e);
-			}
-			cntElements--;
-			modCount++;
-			return true;
+		if (!contains(e))
+			return false;
+		
+		Queue<E> linkedList = data.get(e);
+		linkedList.remove();
+		if (linkedList.isEmpty()) {
+			data.remove(e);
 		}
-		return false;
+		cntElements--;
+		modCount++;
+
+		return true;
 	}
 	
 	@Override
@@ -75,11 +76,7 @@ public class Bag<E> extends AbstractCollection<E> {
 
 	@Override
 	public int size() {
-		if (cntElements > Integer.MAX_VALUE) {
-			return Integer.MAX_VALUE;
-		} else {
-			return (int)cntElements;
-		}
+		return (int) Math.min(cntElements, Integer.MAX_VALUE);
 	}
 
 	private class BagIterator implements Iterator<E> {
@@ -128,11 +125,11 @@ public class Bag<E> extends AbstractCollection<E> {
 				throw new IllegalStateException();
 			}
 			listIterator.remove();
-			
 			if (data.get(currentKey).isEmpty()) {
 				keysIterator.remove();
 			}
 			
+			expectedModCount = modCount;
 			cntElements--;
 		}
 
