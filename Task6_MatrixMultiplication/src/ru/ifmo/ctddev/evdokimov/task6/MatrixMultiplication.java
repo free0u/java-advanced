@@ -16,7 +16,7 @@ public class MatrixMultiplication {
 	private int n;
 	
 	/**
-	 * Store matrix
+	 * Matrices
 	 */
 	private int[][] A, B, resultMatrix;
 	
@@ -25,9 +25,9 @@ public class MatrixMultiplication {
 	 * 
 	 * @param n size of matrix
 	 * @param m count of threads
-	 * @throws Exception 
+	 * @throws InterruptedException throws if thread was interrupted
 	 */
-	public MatrixMultiplication(int n, int m) {
+	public MatrixMultiplication(int n, int m) throws InterruptedException {
 		Random random = new Random();
 		
 		this.n = n;
@@ -37,24 +37,13 @@ public class MatrixMultiplication {
 		
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
-				A[i][j] = random.nextInt(10);
-				B[i][j] = random.nextInt(10);
+				A[i][j] = random.nextInt();
+				B[i][j] = random.nextInt();
 			}
 		}
 		
 		resultMatrix = new int[n][n];
 		
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				int res = 0;
-				for (int k = 0; k < n; k++) {
-					res += A[i][k] * B[k][j];
-				}
-				resultMatrix[i][j] = res;
-			}
-		}
-		
-
 		int n2 = n * n;
 		
 		double dblocks = ((double) n2 / m);
@@ -74,7 +63,6 @@ public class MatrixMultiplication {
 				indx[j] = pos++;
 			}
 			
-			
 			count = blocks;
 			while (count > 0 && indx[count - 1] >= n2) {
 				count--;
@@ -87,13 +75,16 @@ public class MatrixMultiplication {
 		}
 		
 		for (int i = 0; i < m; i++) {
-			try {
-				threads[i].join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			threads[i].join();
 		}
 		
+		int sum = 0;
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				sum += resultMatrix[i][j];
+			}
+		}
+		System.out.println(sum);
 	}
 	
 	/**
@@ -119,7 +110,7 @@ public class MatrixMultiplication {
 		}
 		
 		/**
-		 * Calculate part
+		 * Calculate part of matrix
 		 */
 		@Override
 		public void run() {
@@ -136,5 +127,49 @@ public class MatrixMultiplication {
 			}
 		}
 		
+	}
+
+
+	/**
+	 * @param args input parameters 
+	 *     $1 -- size of matrix
+	 *     $2 -- count of threads
+	 */
+	public static void main(String[] args) {
+		if (args.length != 2) {
+			System.out.println("Usage: MatrixMultiplication <size of matrix> <count of thread>");
+			return;
+		}
+		int n = Integer.valueOf(args[0]);
+		int m = Integer.valueOf(args[1]);
+		
+		double[] time = new double[m];
+		final int COUNT_REPEAT = 4;
+		
+		for (int i = 1; i <= m; i++) {
+			System.out.format("%d ", i);
+			
+			double sum = 0;
+			
+			for (int j = 0; j < COUNT_REPEAT; j++) {
+				long start = System.nanoTime();
+				try {
+					new MatrixMultiplication(n, i);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				long d = System.nanoTime() - start;
+				
+				sum += d;
+			}
+			
+			sum /= COUNT_REPEAT;
+			
+			time[i - 1] = sum;
+		}
+		System.out.println();
+		for (int i = 0; i < m; i++) {
+			System.out.format("%f\n", time[i]);
+		}
 	}
 }
