@@ -48,8 +48,7 @@ public class Invoker {
 						if (newArgs.length == ps.length) {
 							correctArgs = true;
 							for (int i = 0; i < ps.length; i++) {
-								if (!(ps[i].equals(Object.class) || 
-									ps[i].equals(String.class))) {
+								if (!ps[i].isAssignableFrom(String.class)) {
 									correctArgs = false;
 									break;
 								}
