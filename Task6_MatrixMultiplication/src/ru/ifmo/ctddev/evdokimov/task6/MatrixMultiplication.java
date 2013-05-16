@@ -3,48 +3,31 @@ package ru.ifmo.ctddev.evdokimov.task6;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Class for matrix multiplication
+ * 
+ * @author Anton Evdokimov
+ *
+ */
 public class MatrixMultiplication {
+	/**
+	 * Size of matrix
+	 */
 	private int n;
+	
+	/**
+	 * Store matrix
+	 */
 	private int[][] A, B, resultMatrix;
 	
 	/**
-	 * Print matrix to stdout
-	 * 
-	 * @param matrix matrix to print
-	 */
-	private void dumpMatrix(int[][] matrix) {
-		for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j < matrix.length; j++) {
-				System.out.format("%d ", matrix[i][j]);
-			}
-			System.out.println();
-		}
-		System.out.println();
-	}
-	
-	private boolean checkResult(int[][] a, int[][] b, int[][] c) {
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				int res = 0;
-				for (int k = 0; k < n; k++) {
-					res += a[i][k] * b[k][j];
-				}
-				
-				if (res != c[i][j]) return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	
-	/**
+	 * Init random matrix and setup threads
 	 * 
 	 * @param n size of matrix
 	 * @param m count of threads
 	 * @throws Exception 
 	 */
-	public MatrixMultiplication(int n, int m) throws Exception {
+	public MatrixMultiplication(int n, int m) {
 		Random random = new Random();
 		
 		this.n = n;
@@ -80,12 +63,6 @@ public class MatrixMultiplication {
 			blocks = n2 / m;
 		}
 		
-		//int blocks = n2 / m;
-		//if (n2 % m != 0) {
-		//	blocks++;
-		//}
-		//System.out.println(blocks);
-		
 		Thread[] threads = new Thread[m];
 		
 		int[] indx = new int[n2];
@@ -117,20 +94,35 @@ public class MatrixMultiplication {
 			}
 		}
 		
-//		if (!checkResult(A, B, resultMatrix)) {
-//			throw new Exception("Ans wrong");
-//		}
 	}
 	
+	/**
+	 * Class calculate part of matrix
+	 * 
+	 * @author Anton Evdokimov
+	 *
+	 */
 	private class Worker implements Runnable {
-		int[] indx;
+		/**
+		 * Stored indexes
+		 */
+		private int[] indx;
+		
+		/**
+		 * Init vars
+		 * 
+		 * @param indx array of indexes
+		 * @param count count of indexes
+		 */
 		public Worker(int[] indx, int count) {
 			this.indx = Arrays.copyOf(indx, count);
 		}
 		
+		/**
+		 * Calculate part
+		 */
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			for (int g = 0; g < indx.length; g++) {
 				int i = indx[g] / n;
 				int j = indx[g] % n;
