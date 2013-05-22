@@ -15,9 +15,6 @@ public class TaskRunnerImpl implements TaskRunner {
 	/** Queue for input tasks */
 	private BlockingQueue<TaskItem<?, ?>> taskQueue = new LinkedBlockingQueue<>();
 	
-	/** lock for queue (checking for empty) */
-	private Object lockForQueue;
-	
 	/**
 	 * Task with addition content
 	 * 
@@ -78,18 +75,12 @@ public class TaskRunnerImpl implements TaskRunner {
 		@Override
 		public void run() {
 			while (true) {
-				TaskItem<?, ?> ti = taskQueue.poll();
-				if (ti == null) {
-					synchronized (lockForQueue) {
-						try {
-							lockForQueue.wait();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					continue;
+				try {
+					TaskItem<?, ?> ti = taskQueue.take();
+					ti.exec();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
-				ti.exec();
 			}
 		}
 	}
@@ -98,8 +89,6 @@ public class TaskRunnerImpl implements TaskRunner {
 	 * @param countThreads - count of threads
 	 */
 	public TaskRunnerImpl(int countThreads) {
-		lockForQueue = new Object();
-		
 		Thread[] th = new Thread[countThreads];
 		for (int i = 0; i < countThreads; i++) {
 			th[i] = new Thread(new Worker());
@@ -111,10 +100,6 @@ public class TaskRunnerImpl implements TaskRunner {
 	public <X, Y> X run(Task<X, Y> task, Y value) {
 		TaskItem<X, Y> taskItem = new TaskItem<X, Y>(task, value);
 		taskQueue.add(taskItem);
-		
-		synchronized (lockForQueue) {
-			lockForQueue.notifyAll();
-		}
 		
 		synchronized (taskItem) {
 			while (!taskItem.haveResult()) {
