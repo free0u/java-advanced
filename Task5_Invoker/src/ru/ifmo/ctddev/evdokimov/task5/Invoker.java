@@ -3,6 +3,9 @@ package ru.ifmo.ctddev.evdokimov.task5;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 
 public class Invoker {
@@ -18,7 +21,14 @@ public class Invoker {
 		Object[] newArgs = Arrays.copyOfRange(args, 2, args.length);
 		
 		try {
-			Class<?> c = Class.forName(className);
+			URL jar = null;
+			try {
+				jar = new URL("file://.");
+			} catch (MalformedURLException ignore) {
+			}
+
+			ClassLoader cl = new URLClassLoader(new URL[]{jar});
+			Class<?> c = cl.loadClass(className);
 			
 			int mod = c.getModifiers();
 			
