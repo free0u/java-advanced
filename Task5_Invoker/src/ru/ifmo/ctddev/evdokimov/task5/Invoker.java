@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-public class Invoker {
 
+public class Invoker {
 	public static void main(String[] args) {
 		if (args.length < 2) {
 			System.out.println("Usage: Invoker <full-class-name> <method-name> <method-arg...>");
