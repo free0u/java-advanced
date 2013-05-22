@@ -1,20 +1,19 @@
 package ru.ifmo.ctddev.evdokimov.task5;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 public class Invoker {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		if (args.length < 2) {
 			System.out.println("Usage: Invoker <full-class-name> <method-name> <method-arg...>");
 			return;
@@ -55,9 +54,13 @@ public class Invoker {
 					return;
 				}
 				
+				Set<List<Class<?>>> calledMethods = new HashSet<>();
+				
 				for (Method method : c.getMethods()) {
 					if (method.getName().equals(methodName)) {
 						Class<?>[] ps = method.getParameterTypes();
+						if (calledMethods.contains(Arrays.asList(ps)))
+							continue;
 						
 						boolean correctArgs = false;
 						if (newArgs.length == ps.length) {
@@ -74,6 +77,8 @@ public class Invoker {
 							continue;
 						}
 	
+						calledMethods.add(Arrays.asList(ps));
+						
 						System.out.println(method);
 						
 						try {
