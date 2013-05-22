@@ -1,20 +1,25 @@
 package ru.ifmo.ctddev.evdokimov.task5;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 
 public class Invoker {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		if (args.length < 2) {
 			System.out.println("Usage: Invoker <full-class-name> <method-name> <method-arg...>");
 			return;
 		}
+		
 		String className = args[0];
 		String methodName = args[1];
 		
@@ -23,7 +28,7 @@ public class Invoker {
 		try {
 			URL jar = null;
 			try {
-				jar = new URL("file://.");
+				jar = new File(".").toURI().toURL();
 			} catch (MalformedURLException ignore) {
 			}
 
