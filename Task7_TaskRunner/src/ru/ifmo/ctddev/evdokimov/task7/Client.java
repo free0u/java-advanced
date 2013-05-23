@@ -14,7 +14,7 @@ public class Client {
 	 * Ctor generates TaskRunner
 	 */
 	public Client()  {
-		tr = new TaskRunnerImpl(1);
+		this(new TaskRunnerImpl(1));
 	}
 	
 	/**
@@ -23,7 +23,6 @@ public class Client {
 	 * @param tr TaskRunner item
 	 */
 	public Client(TaskRunner tr) {
-		super();
 		this.tr = tr;
 	}
 	
@@ -42,6 +41,9 @@ public class Client {
 		while (true) {
 			Task<Integer, Integer> task = new TaskRefl<>();
 			System.out.println(tr.run(task, id));
+			if (Thread.interrupted()) {
+				break;
+			}
 		}
 	}
 }

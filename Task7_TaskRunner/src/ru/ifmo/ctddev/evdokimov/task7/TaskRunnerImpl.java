@@ -48,21 +48,7 @@ public class TaskRunnerImpl implements TaskRunner {
 		public synchronized void exec() {
 			result = task.run(value);
 			haveResult = true;
-			this.notifyAll();
-		}
-		
-		/**
-		 * @return result of task
-		 */
-		public X getResult() {
-			return result;
-		}
-		
-		/**
-		 * @return true if task completed
-		 */
-		public boolean haveResult() {
-			return haveResult;
+			this.notify();
 		}
 	}
 
@@ -79,7 +65,7 @@ public class TaskRunnerImpl implements TaskRunner {
 					TaskItem<?, ?> ti = taskQueue.take();
 					ti.exec();
 				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
+					break;
 				}
 			}
 		}
@@ -99,18 +85,19 @@ public class TaskRunnerImpl implements TaskRunner {
 	@Override
 	public <X, Y> X run(Task<X, Y> task, Y value) {
 		TaskItem<X, Y> taskItem = new TaskItem<X, Y>(task, value);
-		taskQueue.add(taskItem);
-		
-		synchronized (taskItem) {
-			while (!taskItem.haveResult()) {
-				try {
+
+		try {
+			taskQueue.put(taskItem);
+			
+			synchronized (taskItem) {
+				while (!taskItem.haveResult) {
 					taskItem.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
 				}
 			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 		
-		return taskItem.getResult();
+		return taskItem.result;
 	}
 }
