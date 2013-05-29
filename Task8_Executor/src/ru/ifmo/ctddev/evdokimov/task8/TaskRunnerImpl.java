@@ -1,10 +1,10 @@
-/**
- * 
- */
 package ru.ifmo.ctddev.evdokimov.task8;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Multithreading realization of TaskRunner
@@ -12,92 +12,44 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Anton Evdokimov
  */
 public class TaskRunnerImpl implements TaskRunner {
-	/** Queue for input tasks */
-	private BlockingQueue<TaskItem<?, ?>> taskQueue = new LinkedBlockingQueue<>();
-	
-	/**
-	 * Task with addition content
-	 * 
-	 * @author Anton Evdokimov
-	 *
-	 * @param <X> - type of return value
-	 * @param <Y> - type of arg
-	 */
-	private class TaskItem<X, Y> {
-		/** store task */
-		private Task<X, Y> task;
-		/** store result */
-		private X result;
-		/** store input value */
-		private Y value;
-		/** true if task completed */
-		private boolean haveResult;
-		
-		/**
-		 * @param task input task
-		 * @param value value for task
-		 */
-		public TaskItem(Task<X, Y> task, Y value) {
-			this.task = task;
-			this.value = value;
-		}
-		
-		/**
-		 * Execution of task
-		 */
-		public synchronized void exec() {
-			result = task.run(value);
-			haveResult = true;
-			this.notify();
-		}
-	}
-
-	/**
-	 * Class for multithread execution of tasks
-	 * 
-	 * @author Anton Evdokimov
-	 */
-	private class Worker implements Runnable {
-		@Override
-		public void run() {
-			while (true) {
-				try {
-					TaskItem<?, ?> ti = taskQueue.take();
-					ti.exec();
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
-		}
-	}
+	/** Executor service for input tasks */
+	private ExecutorService es;
 	
 	/**
 	 * @param countThreads - count of threads
 	 */
 	public TaskRunnerImpl(int countThreads) {
-		Thread[] th = new Thread[countThreads];
-		for (int i = 0; i < countThreads; i++) {
-			th[i] = new Thread(new Worker());
-			th[i].start();
+		es = Executors.newFixedThreadPool(countThreads);
+	}
+	
+	private class CallableTask<X, Y> implements Callable<X> {
+		private Task<X, Y> task;
+		private Y value;
+
+		public CallableTask(Task<X, Y> task, Y value) {
+			this.task = task;
+			this.value = value;
+		}
+		
+		@Override
+		public X call() {
+			return task.run(value);
 		}
 	}
 	
 	@Override
 	public <X, Y> X run(Task<X, Y> task, Y value) {
-		TaskItem<X, Y> taskItem = new TaskItem<X, Y>(task, value);
-
+		Future<X> future = es.submit(new CallableTask<X, Y>(task, value));
+		while (!future.isDone());
+		
+		X result = null;
 		try {
-			taskQueue.put(taskItem);
-			
-			synchronized (taskItem) {
-				while (!taskItem.haveResult) {
-					taskItem.wait();
-				}
-			}
+			result = future.get();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} catch (ExecutionException ignore) {
 		}
 		
-		return taskItem.result;
+		return result;
 	}
 }
